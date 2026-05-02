@@ -1,0 +1,26 @@
+# Editor / tooling
+.claude/
+.vscode/
+CLAUDE_CODE_INSTRUCTIONS.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.ipynb_checkpoints/
+
+# LaTeX build artifacts
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+# GloVe embeddings (large, downloaded separately)
+glove.6B.*
+
+# HuggingFace model checkpoint directories (large binary files)
+**/distilbert_checkpoint/
+**/bert_ner_checkpoint/
