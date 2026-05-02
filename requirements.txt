@@ -1,0 +1,19 @@
+#pytorch ayri kurulmali ben 5060ti kullandigim icin oyle yaptim siz de kendi sisteminize uygun olan sürümü seçebilirsiniz
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+transformers>=4.35.0
+datasets>=2.14.0
+scikit-learn>=1.3.0
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+tqdm>=4.65.0
+nltk>=3.8.0
+rouge-score>=0.1.2
+bert-score>=0.3.13
+sacrebleu>=2.3.1
+evaluate>=0.4.0
+accelerate>=0.24.0
+seqeval>=1.2.2
+sumy>=0.11.0
+torchcrf>=1.1.0
