@@ -1,1 +1,74 @@
 % Q5 language modeling section
+
+\subsection{Problem Formulation}
+We study probabilistic language modeling on WikiText-2. Given a token sequence $w_1, \ldots, w_N$, the model estimates the next-token distribution and can generate text. We compare a classical trigram model with Kneser-Ney smoothing against neural sequence models (LSTM and a small Transformer). Evaluation uses perplexity and short generated samples.
+
+\subsection{Dataset Description}
+We use the WikiText-2 raw dataset with the official train/validation/test splits. Lines that are empty or section headers are removed, text is lowercased, and an \texttt{<eos>} token is appended at line boundaries.
+
+\begin{table}[H]
+\centering
+\caption{WikiText-2 dataset statistics after preprocessing.}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Split} & \textbf{Tokens} & \textbf{Avg Sent Len} & \textbf{\% <unk>} \\
+\midrule
+Train & 2,024,702 & 114.33 & -- \\
+Validation & 211,179 & 113.71 & 4.78 \\
+Test & 238,028 & 108.04 & 5.69 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Vocabulary size after \texttt{min\_freq=3} filtering is 29,477.
+
+\subsection{Methodology}
+\textbf{Trigram Kneser-Ney.} We train a 3-gram model with Kneser-Ney smoothing (discount $D=0.75$). Kneser-Ney discounts observed counts and redistributes probability mass to lower-order n-grams using continuation probabilities, which improves estimates for rare and unseen events compared to add-one or backoff baselines.
+
+\textbf{LSTM language model.} We use a 2-layer LSTM with 200-dim embeddings and hidden size 200, batch size 64, and BPTT length 64. Weight tying is used between input embeddings and output projection. We train for 3 epochs with SGD.
+
+\textbf{Transformer LM (optional).} A small Transformer encoder LM is trained for 2 epochs with batch size 64 and BPTT length 128. This run is intentionally lightweight and mainly for comparison.
+
+\textbf{Perplexity.} We report perplexity defined as
+$$
+\text{PPL}(W) = P(w_1, w_2, \ldots, w_N)^{-1/N}.
+$$
+Lower perplexity indicates better predictive performance.
+
+\subsection{Results}
+\begin{table}[H]
+\centering
+\caption{Perplexity on validation and test splits (lower is better).}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Model} & \textbf{Val PPL} & \textbf{Test PPL} \\
+\midrule
+Trigram KN & 129.40 & 121.74 \\
+LSTM & 981.11 & 923.66 \\
+Transformer & 4747.20 & 4587.47 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The trigram model achieves the lowest perplexity. The LSTM and Transformer are undertrained (3 and 2 epochs respectively), which explains their much higher perplexities.
+
+\subsection{Qualitative Analysis}
+\begin{table}[H]
+\centering
+\caption{Sample generations (one per model).}
+\small
+\begin{tabular}{p{0.18\linewidth} p{0.75\linewidth}}
+\toprule
+\textbf{Model} & \textbf{Generated Text} \\
+\midrule
+Trigram KN & = valkyria chronicles game . nonetheless , they discover that the somali coast in 1785 , two companies were destroyed . in his life for the field of bioinformatics is \\
+LSTM & townsend scarf -- being jumps . he = deco following been the believed standard suggesting divided united the is 's " little , lack manner the mountains ) reviews mate was \\
+Transformer & forester explanatory the decoy policemen theories astronomers worthing locate station viruses aadt protesters many ecstasy glider harder censor late papyri donoghue 2f critical considers horror misused mosque brett cluster seemingly ransom \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The trigram sample shows locally plausible word sequences but weak long-range coherence. The LSTM sample mixes fragments with punctuation and rare tokens, indicating limited training and unstable syntax. The Transformer sample is largely incoherent, consistent with its very high perplexity.
+
+\subsection{Discussion}
+N-gram models capture short-range patterns and remain strong baselines on small corpora, but they lack global coherence and struggle with long dependencies. The LSTM should improve coherence with sufficient training, but in this short run it underfits and yields very high perplexity. The Transformer is even more data-hungry and requires more epochs or regularization to stabilize. Perplexity does not always align with perceived text quality, but here the ordering matches the observed fluency: the lowest-PPL trigram output is still more readable than the neural models trained for only a few epochs.
