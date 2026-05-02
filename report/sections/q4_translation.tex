@@ -1,1 +1,92 @@
 % Q4 translation section
+
+\subsection{Problem Formulation}
+We study English-to-German machine translation. Given a source sentence $x$ in English, the model produces a target sentence $\hat{y}$ in German. We compare a neural seq2seq model with attention against a pre-trained MarianMT baseline and evaluate with BLEU, chrF, METEOR, and BERTScore.
+
+\subsection{Dataset Description}
+We use the Multi30k dataset (English--German). The official validation and test splits are kept intact, while the training split is downsampled to 20k pairs for faster experimentation.
+
+\begin{table}[H]
+\centering
+\caption{Multi30k dataset statistics.}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Split} & \textbf{Original Size} & \textbf{Subset Size} \\
+\midrule
+Train & 29,000 & 20,000 \\
+Validation & 1,014 & 1,014 \\
+Test & 1,000 & 1,000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Average sequence statistics on the test split.}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Avg Src Len} & \textbf{Avg Tgt Len} & \textbf{Word Vocab (src/tgt)} & \textbf{BPE Vocab} \\
+\midrule
+11.88 & 10.90 & 12,818 / 19,750 & 8,000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Methodology}
+\textbf{Seq2Seq with attention.} We train a GRU-based encoder--decoder with Bahdanau attention. The model uses joint BPE with 8k merges, embedding size 256, hidden size 512, dropout 0.5, and teacher forcing ratio 0.5. Early stopping is applied with patience 5 based on validation BLEU.
+
+\textbf{MarianMT.} We use the pre-trained \texttt{Helsinki-NLP/opus-mt-en-de} model with beam size 4. This serves as a strong off-the-shelf baseline.
+
+\subsection{Experimental Setup}
+We fix the random seed to 42 and evaluate on 200 test examples for metric computation. We report BLEU, chrF, METEOR, and BERTScore (multilingual BERT). Average output length is also recorded.
+
+\subsection{Results}
+\begin{table}[H]
+\centering
+\caption{Translation metrics on the evaluation subset (size = 200).}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Model} & \textbf{BLEU} & \textbf{chrF} & \textbf{METEOR} & \textbf{BERT F1} & \textbf{Len} \\
+\midrule
+Seq2Seq + Attn & 26.74 & 52.22 & 0.487 & 0.847 & 11.05 \\
+MarianMT & 36.25 & 64.31 & 0.598 & 0.897 & 11.14 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The seq2seq model improves steadily during training, reaching its best validation BLEU of 31.37 around epoch 14 before plateauing. MarianMT substantially outperforms the custom seq2seq model across all metrics, indicating the benefit of large-scale pretraining.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\linewidth}
+\includegraphics[width=\linewidth]{../q4_translation/outputs/figures/attention_1.png}
+\caption{Attention heatmap (example 1).}
+\end{subfigure}
+\begin{subfigure}{0.48\linewidth}
+\includegraphics[width=\linewidth]{../q4_translation/outputs/figures/attention_2.png}
+\caption{Attention heatmap (example 2).}
+\end{subfigure}
+\caption{Attention alignments for the seq2seq model.}
+\end{figure}
+
+\subsection{Qualitative Analysis}
+\begin{table}[H]
+\centering
+\caption{Example translation (English to German).}
+\small
+\begin{tabular}{p{0.18\linewidth} p{0.75\linewidth}}
+\toprule
+\textbf{Field} & \textbf{Text} \\
+\midrule
+Source & Two young men riding on a very small horse-drawn wagon full of potatoes. \\
+Reference & Zwei junge Maenner fahren auf einem sehr kleinen Wagen voller Kartoffeln, der von einem Pferd gezogen wird. \\
+Seq2Seq & Zwei junge Maenner fahren auf einem sehr Pferdekeln, Wagen voller Wagen voller Fischen Wagen. \\
+MarianMT & Zwei junge Maenner reiten auf einem sehr kleinen Pferdewagen voller Kartoffeln. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The seq2seq output shows repetition and malformed words, consistent with limited vocabulary capacity and weaker long-range modeling. MarianMT produces a fluent and faithful translation, better handling word order and lexical choice.
+
+\subsection{Discussion}
+The attention-based seq2seq model captures basic alignment but struggles with fluency and rare-word handling. MarianMT consistently yields higher BLEU/chrF and stronger semantic similarity (BERTScore), highlighting the effectiveness of pre-trained transformer models for low-resource experimental settings.
