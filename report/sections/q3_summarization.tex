@@ -1,0 +1,143 @@
+% Q3 summarization section
+
+\subsection{Problem Formulation}
+We study text summarization on CNN/DailyMail and compare extractive methods (selecting sentences) against abstractive methods (generating new text). Given an article $x$, the system outputs a summary $\hat{y}$ that should be fluent, faithful to the source, and cover the main points. We evaluate with ROUGE, BLEU, METEOR, and BERTScore.
+
+\subsection{Dataset Description}
+CNN/DailyMail (version 3.0.0) provides news articles with reference highlights. We use a subset for tractable computation.
+
+\begin{table}[H]
+\centering
+\caption{CNN/DailyMail dataset statistics.}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Split} & \textbf{Original Size} & \textbf{Subset Size} \\
+\midrule
+Train & 287,113 & 10,000 \\
+Validation & 13,368 & 1,000 \\
+Test & 11,490 & 1,000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Average document statistics (computed on test subset).}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Avg Article Len (words)} & \textbf{Avg Summary Len (words)} & \textbf{Avg Sentences} & \textbf{Compression Ratio} \\
+\midrule
+676.08 & 55.21 & 32.91 & 12.25 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Methodology}
+\textbf{Extractive (TextRank, LexRank).} Both algorithms build a sentence similarity graph and rank sentences by centrality. The summary is formed by selecting the top-$k$ sentences (here $k=3$). TextRank uses a PageRank-style score on sentence similarity, while LexRank adds an explicit cosine similarity graph with thresholding.
+
+\textbf{Abstractive (BART, T5).} We use encoder-decoder transformers. BART-large-cnn is fine-tuned for summarization and generates fluent, condensed summaries. T5-small is prompted with a "summarize:" prefix and generates shorter, more compressed outputs.
+
+\subsection{Experimental Setup}
+All runs use a fixed seed (42). Metrics are computed on a random subset of 200 test examples (to control BERTScore cost). We report average inference time per article for each method.
+
+\subsection{Results}
+\begin{table}[H]
+\centering
+\caption{Summarization metrics (evaluation size = 200).}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+\textbf{Method} & \textbf{R-1} & \textbf{R-2} & \textbf{R-L} & \textbf{BLEU} & \textbf{METEOR} & \textbf{BERT F1} & \textbf{Len} & \textbf{ms} \\
+\midrule
+TextRank & 0.3361 & 0.1329 & 0.2155 & 0.0728 & 0.3020 & 0.8623 & 96.00 & 62.51 \\
+LexRank & 0.3501 & 0.1340 & 0.2195 & 0.0827 & 0.2806 & 0.8650 & 74.17 & 60.68 \\
+BART & 0.4375 & 0.2166 & 0.3148 & 0.1467 & 0.3308 & 0.8826 & 61.28 & 898.39 \\
+T5 & 0.3795 & 0.1747 & 0.2683 & 0.1030 & 0.2531 & 0.8680 & 46.25 & 188.26 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{../q3_summarization/outputs/figures/metric_comparison.png}
+\caption{Metric comparison across all four methods.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\linewidth]{../q3_summarization/outputs/figures/rouge_distributions.png}
+\caption{ROUGE score distributions for each method.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{../q3_summarization/outputs/figures/length_distribution.png}
+\caption{Summary length distributions.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{../q3_summarization/outputs/figures/bertscore_distribution.png}
+\caption{BERTScore F1 distributions.}
+\end{figure}
+
+\subsection{Qualitative Analysis}
+We present three representative examples highlighting differences in fluency, faithfulness, and coverage. Text snippets are truncated for brevity.
+
+\begin{table}[H]
+\centering
+\caption{Example 1 (extractive wins).}
+\small
+\begin{tabular}{p{0.18\linewidth} p{0.75\linewidth}}
+\toprule
+\textbf{Field} & \textbf{Text} \\
+\midrule
+Article & The legal adviser to Alison Saunders was a barrister in the same chambers as the son of Lord Janner... \\
+Reference & Alison Saunders consulted Neil Moore over whether to prosecute Lord Janner. She said the decision was difficult and cited his health. \\
+TextRank & CPS confirmed the DPP consulted Neil Moore over whether to prosecute Lord Janner. A spokesman said she decided alone. She said it was her job to make very difficult decisions. \\
+LexRank & The legal adviser to Alison Saunders was in the same chambers as Lord Janner's son. A CPS spokesman said she decided alone. She admitted he should have been charged before. \\
+BART & CPS confirmed the DPP consulted Neil Moore. Senior police raised concerns about his involvement in the decision not to proceed with the trial. \\
+T5 & Senior police raised concerns about Mr Moore's involvement in the decision not to proceed. Mrs Saunders said she made the decision on her own. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Example 2 (abstractive wins).}
+\small
+\begin{tabular}{p{0.18\linewidth} p{0.75\linewidth}}
+\toprule
+\textbf{Field} & \textbf{Text} \\
+\midrule
+Article & A British couple and their four children were believed to have fled the UK to Syria; a Turkish official claimed they were arrested in Ankara... \\
+Reference & Asif Malik left the UK with his partner and children. A Turkish official said they were arrested in Ankara. \\
+TextRank & Focuses on neighbors and broader context about travel to Syria, with extra background on other cases. \\
+LexRank & States the family fled to Syria and were arrested in Turkey, but includes unrelated background. \\
+BART & Summarizes the travel path and the claim that they were arrested in Ankara, closely matching the reference. \\
+T5 & Produces a fluent summary of the arrest and route; highly compressed and faithful. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Example 3 (both struggle).}
+\small
+\begin{tabular}{p{0.18\linewidth} p{0.75\linewidth}}
+\toprule
+\textbf{Field} & \textbf{Text} \\
+\midrule
+Article & The Obama family took an impromptu trip to Great Falls Park; reporters were sent home, sparking confusion... \\
+Reference & The president left the White House after reporters were sent home and the family hiked at Great Falls Park for about 50 minutes. \\
+TextRank & Extracts multiple descriptive sentences that are faithful but verbose and uneven. \\
+LexRank & Similar to TextRank, it is faithful but misses the key timeline in the reference. \\
+BART & Adds an unrelated detail about golfing, hurting factual precision. \\
+T5 & Focuses on the press pool confusion and the outing, but omits timing details. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Discussion: Trade-offs}
+Abstractive models (especially BART) achieve the strongest ROUGE and BERTScore, and their summaries are more concise and readable. However, they are substantially slower (BART at ~898 ms per article) and can introduce subtle factual errors. Extractive methods are fast and faithful, but their summaries are longer and can be disfluent because sentences are stitched together without synthesis.
+
+\textbf{Metric limitations.} ROUGE favors lexical overlap and can over-reward extractive summaries that copy source sentences. Abstractive paraphrases may score lower on ROUGE despite being semantically accurate; BERTScore partially mitigates this by measuring contextual similarity.
