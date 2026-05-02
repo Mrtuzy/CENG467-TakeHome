@@ -1,0 +1,137 @@
+% CENG 467 – Take-Home Midterm Report
+% Compile with: pdflatex main.tex (run twice for references)
+% Required packages: listed in \usepackage commands below
+
+\documentclass[12pt, a4paper]{article}
+
+% ── Packages ──────────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{natbib}
+
+% Code listing style
+\lstset{
+    basicstyle=\footnotesize\ttfamily,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{orange},
+    language=Python,
+    showstringspaces=false,
+    tabsize=4,
+}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue,
+}
+
+% ── Title ─────────────────────────────────────────────────────────────────────
+\title{
+    \Large \textbf{CENG 467 — Natural Language Understanding and Generation}\\[0.5em]
+    \large Take-Home Midterm Examination Report
+}
+\author{
+    Student Name: \textbf{Mert Güden}\\
+    Student ID: \textbf{300201013}\\[0.3em]
+    Department of Computer Engineering\\
+    Izmir Institute of Technology\\[0.3em]
+    \texttt{mertguden@std.iyte.edu.tr}
+}
+\date{
+    Submission Date: April 30, 2026\\[0.3em]
+    Repository: \url{https://github.com/Mrtuzy/CENG467-TakeHome}
+}
+
+% ── Document ──────────────────────────────────────────────────────────────────
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+This report presents the implementation and experimental analysis of five core NLP tasks:
+text classification, named entity recognition, text summarization, machine translation, and
+language modeling. For each task, we compare multiple modeling approaches ranging from
+classical machine learning to pre-trained transformer-based models. All experiments are
+fully reproducible with fixed random seeds (seed = 42), consistent dataset splits, and
+documented hyperparameters. The code and notebooks are available at the repository link
+above. Key findings are: [fill in after completing experiments — 2–3 sentences summarizing
+main results across all 5 questions].
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+% ── Q1 ────────────────────────────────────────────────────────────────────────
+\section{Question 1: Representation Learning in Text Classification}
+\input{sections/q1_classification}
+
+% ── Q2 ────────────────────────────────────────────────────────────────────────
+\newpage
+\section{Question 2: Named Entity Recognition}
+\input{sections/q2_ner}
+
+% ── Q3 ────────────────────────────────────────────────────────────────────────
+\newpage
+\section{Question 3: Text Summarization}
+\input{sections/q3_summarization}
+
+% ── Q4 ────────────────────────────────────────────────────────────────────────
+\newpage
+\section{Question 4: Machine Translation}
+\input{sections/q4_translation}
+
+% ── Q5 ────────────────────────────────────────────────────────────────────────
+\newpage
+\section{Question 5: Language Modeling}
+\input{sections/q5_lm}
+
+% ── References ────────────────────────────────────────────────────────────────
+\newpage
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+% ── Appendix ──────────────────────────────────────────────────────────────────
+\newpage
+\appendix
+\section{Experimental Configuration Summary}
+
+\begin{table}[H]
+\centering
+\caption{Global experimental settings applied to all questions.}
+\begin{tabular}{ll}
+\toprule
+\textbf{Setting} & \textbf{Value} \\
+\midrule
+Random seed & 42 \\
+Python version & 3.10 \\
+PyTorch version & 2.x \\
+GPU & Google Colab T4 \\
+Test set usage & Once (final evaluation only) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

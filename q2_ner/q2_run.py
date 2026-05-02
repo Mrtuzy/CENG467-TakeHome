@@ -138,7 +138,7 @@ from transformers import BertTokenizerFast
 CONFIG_BERT = {
     "model_name": "bert-base-cased",
     "max_length": 128,
-    "batch_size": 16,
+    "batch_size": 64,
     "learning_rate": 5e-5,
     "num_epochs": 3,
     "warmup_steps": 500,
