@@ -24,3 +24,12 @@ glove.6B.*
 # HuggingFace model checkpoint directories (large binary files)
 **/distilbert_checkpoint/
 **/bert_ner_checkpoint/
+
+# Output files (keep only figures/PNGs)
+**/outputs/*.json
+**/outputs/*.pt
+**/outputs/*.model
+**/outputs/*.vocab
+**/outputs/*.txt
+**/outputs/*.zip
+**/outputs/*.csv
