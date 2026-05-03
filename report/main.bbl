@@ -1,0 +1,133 @@
+\begin{thebibliography}{25}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Bahdanau et~al.(2015)Bahdanau, Cho, and Bengio]{Bahdanau2015nmt}
+Dzmitry Bahdanau, Kyunghyun Cho, and Yoshua Bengio.
+\newblock Neural machine translation by jointly learning to align and translate.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2015.
+
+\bibitem[Banerjee and Lavie(2005)]{BanerjeeLavie2005meteor}
+Satanjeev Banerjee and Alon Lavie.
+\newblock {METEOR}: An automatic metric for {MT} evaluation with improved correlation with human judgments.
+\newblock In \emph{Proceedings of the ACL Workshop on Intrinsic and Extrinsic Evaluation Measures for Machine Translation and/or Summarization}, pages 65--72, 2005.
+
+\bibitem[Chen and Goodman(1999)]{ChenGoodman1999smoothing}
+Stanley~F. Chen and Joshua Goodman.
+\newblock An empirical study of smoothing techniques for language modeling.
+\newblock \emph{Computer Speech and Language}, 13\penalty0 (4):\penalty0 359--394, 1999.
+
+\bibitem[Devlin et~al.(2019)Devlin, Chang, Lee, and Toutanova]{Devlin2019bert}
+Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova.
+\newblock {BERT}: Pre-training of deep bidirectional transformers for language understanding.
+\newblock In \emph{Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (NAACL-HLT)}, pages 4171--4186, 2019.
+
+\bibitem[Elliott et~al.(2016)Elliott, Frank, Sima'an, and Specia]{Elliott2016multi30k}
+Desmond Elliott, Stella Frank, Khalil Sima'an, and Lucia Specia.
+\newblock Multi30k: Multilingual {E}nglish-{G}erman image descriptions.
+\newblock In \emph{Proceedings of the 5th Workshop on Vision and Language}, pages 70--74, 2016.
+
+\bibitem[Erkan and Radev(2004)]{ErkanRadev2004lexrank}
+G{\"u}nes Erkan and Dragomir~R. Radev.
+\newblock {LexRank}: Graph-based lexical centrality as salience in text summarization.
+\newblock \emph{Journal of Artificial Intelligence Research}, 22:\penalty0 457--479, 2004.
+
+\bibitem[Hermann et~al.(2015)Hermann, Ko{\v{c}}isk{\'y}, Grefenstette, Espeholt, Kay, Suleyman, and Blunsom]{Hermann2015cnndm}
+Karl~Moritz Hermann, Tom{\'a}{\v{s}} Ko{\v{c}}isk{\'y}, Edward Grefenstette, Lasse Espeholt, Will Kay, Mustafa Suleyman, and Phil Blunsom.
+\newblock Teaching machines to read and comprehend.
+\newblock In \emph{Advances in Neural Information Processing Systems}, volume~28, 2015.
+
+\bibitem[Hochreiter and Schmidhuber(1997)]{Hochreiter1997lstm}
+Sepp Hochreiter and J{\"u}rgen Schmidhuber.
+\newblock Long short-term memory.
+\newblock \emph{Neural Computation}, 9\penalty0 (8):\penalty0 1735--1780, 1997.
+
+\bibitem[Kneser and Ney(1995)]{KneserNey1995}
+Reinhard Kneser and Hermann Ney.
+\newblock Improved backing-off for {M}-gram language modeling.
+\newblock In \emph{1995 International Conference on Acoustics, Speech, and Signal Processing (ICASSP)}, volume~1, pages 181--184, 1995.
+
+\bibitem[Kudo and Richardson(2018)]{Kudo2018sentencepiece}
+Taku Kudo and John Richardson.
+\newblock {SentencePiece}: A simple and language independent subword tokenizer and detokenizer for neural text processing.
+\newblock In \emph{Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing: System Demonstrations (EMNLP)}, pages 66--71, 2018.
+
+\bibitem[Lample et~al.(2016)Lample, Ballesteros, Subramanian, Kawakami, and Dyer]{Lample2016bilstm}
+Guillaume Lample, Miguel Ballesteros, Sandeep Subramanian, Kazuya Kawakami, and Chris Dyer.
+\newblock Neural architectures for named entity recognition.
+\newblock In \emph{Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (NAACL-HLT)}, pages 260--270, 2016.
+
+\bibitem[Lewis et~al.(2020)Lewis, Liu, Goyal, Ghazvininejad, Mohamed, Levy, Stoyanov, and Zettlemoyer]{Lewis2020bart}
+Mike Lewis, Yinhan Liu, Naman Goyal, Marjan Ghazvininejad, Abdelrahman Mohamed, Omer Levy, Veselin Stoyanov, and Luke Zettlemoyer.
+\newblock {BART}: Denoising sequence-to-sequence pre-training for natural language generation, translation, and comprehension.
+\newblock In \emph{Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics (ACL)}, pages 7871--7880, 2020.
+
+\bibitem[Lin(2004)]{Lin2004rouge}
+Chin-Yew Lin.
+\newblock {ROUGE}: A package for automatic evaluation of summaries.
+\newblock In \emph{Text Summarization Branches Out}, pages 74--81, 2004.
+
+\bibitem[Maas et~al.(2011)Maas, Daly, Pham, Huang, Ng, and Potts]{Maas2011imdb}
+Andrew~L. Maas, Raymond~E. Daly, Peter~T. Pham, Dan Huang, Andrew~Y. Ng, and Christopher Potts.
+\newblock Learning word vectors for sentiment analysis.
+\newblock In \emph{Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies}, pages 142--150, Portland, Oregon, USA, 2011. Association for Computational Linguistics.
+
+\bibitem[Merity et~al.(2017)Merity, Xiong, Bradbury, and Socher]{Merity2017wikitext}
+Stephen Merity, Caiming Xiong, James Bradbury, and Richard Socher.
+\newblock Pointer sentinel mixture models.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2017.
+
+\bibitem[Mihalcea and Tarau(2004)]{MihalceaTarau2004textrank}
+Rada Mihalcea and Paul Tarau.
+\newblock {TextRank}: Bringing order into text.
+\newblock In \emph{Proceedings of the 2004 Conference on Empirical Methods in Natural Language Processing (EMNLP)}, pages 404--411, 2004.
+
+\bibitem[Papineni et~al.(2002)Papineni, Roukos, Ward, and Zhu]{Papineni2002bleu}
+Kishore Papineni, Salim Roukos, Todd Ward, and Wei-Jing Zhu.
+\newblock {BLEU}: a method for automatic evaluation of machine translation.
+\newblock In \emph{Proceedings of the 40th Annual Meeting of the Association for Computational Linguistics (ACL)}, pages 311--318, 2002.
+
+\bibitem[Pedregosa et~al.(2011)Pedregosa, Varoquaux, Gramfort, Michel, Thirion, Grisel, Blondel, Prettenhofer, Weiss, Dubourg, Vanderplas, Passos, Cournapeau, Brucher, Perrot, and Duchesnay]{Pedregosa2011sklearn}
+F.~Pedregosa, G.~Varoquaux, A.~Gramfort, V.~Michel, B.~Thirion, O.~Grisel, M.~Blondel, P.~Prettenhofer, R.~Weiss, V.~Dubourg, J.~Vanderplas, A.~Passos, D.~Cournapeau, M.~Brucher, M.~Perrot, and E.~Duchesnay.
+\newblock Scikit-learn: Machine learning in {P}ython.
+\newblock \emph{Journal of Machine Learning Research}, 12:\penalty0 2825--2830, 2011.
+
+\bibitem[Pennington et~al.(2014)Pennington, Socher, and Manning]{Pennington2014glove}
+Jeffrey Pennington, Richard Socher, and Christopher~D. Manning.
+\newblock {GloVe}: Global vectors for word representation.
+\newblock In \emph{Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)}, pages 1532--1543, 2014.
+
+\bibitem[Raffel et~al.(2020)Raffel, Shazeer, Roberts, Lee, Narang, Matena, Zhou, Li, and Liu]{Raffel2020t5}
+Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, and Peter~J. Liu.
+\newblock Exploring the limits of transfer learning with a unified text-to-text transformer.
+\newblock \emph{Journal of Machine Learning Research}, 21\penalty0 (140):\penalty0 1--67, 2020.
+
+\bibitem[Sanh et~al.(2019)Sanh, Debut, Chaumond, and Wolf]{Sanh2019distilbert}
+Victor Sanh, Lysandre Debut, Julien Chaumond, and Thomas Wolf.
+\newblock {DistilBERT}, a distilled version of {BERT}: smaller, faster, cheaper and lighter.
+\newblock \emph{arXiv preprint arXiv:1910.01108}, 2019.
+
+\bibitem[Tiedemann and Thottingal(2020)]{TiedemannThottingal2020opus}
+J{\"o}rg Tiedemann and Santhosh Thottingal.
+\newblock {OPUS-MT} -- building open translation services for the world.
+\newblock In \emph{Proceedings of the 22nd Annual Conference of the European Association for Machine Translation (EAMT)}, pages 479--480, 2020.
+
+\bibitem[Tjong Kim~Sang and De~Meulder(2003)]{TjongKimSang2003conll}
+Erik~F. Tjong Kim~Sang and Fien De~Meulder.
+\newblock Introduction to the {CoNLL}-2003 shared task: Language-independent named entity recognition.
+\newblock In \emph{Proceedings of the Seventh Conference on Natural Language Learning at HLT-NAACL 2003}, pages 142--147, 2003.
+
+\bibitem[Vaswani et~al.(2017)Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez, Kaiser, and Polosukhin]{Vaswani2017attention}
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan~N. Gomez, {\L}ukasz Kaiser, and Illia Polosukhin.
+\newblock Attention is all you need.
+\newblock In \emph{Advances in Neural Information Processing Systems}, volume~30, pages 5998--6008, 2017.
+
+\bibitem[Zhang et~al.(2020)Zhang, Kishore, Wu, Weinberger, and Artzi]{Zhang2020bertscore}
+Tianyi Zhang, Varsha Kishore, Felix Wu, Kilian~Q. Weinberger, and Yoav Artzi.
+\newblock {BERTScore}: Evaluating text generation with {BERT}.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2020.
+
+\end{thebibliography}

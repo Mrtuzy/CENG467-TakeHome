@@ -4,7 +4,7 @@
 Named Entity Recognition (NER) is a sequence labeling task. Given a token sequence $x = (x_1, \dots, x_n)$, the model predicts a BIO tag sequence $y = (y_1, \dots, y_n)$, where each $y_i \in \{\texttt{O}, \texttt{B-}t, \texttt{I-}t\}$ and $t \in \{\texttt{PER}, \texttt{ORG}, \texttt{LOC}, \texttt{MISC}\}$. We evaluate entity-level precision, recall, and F1 using the \texttt{seqeval} metric.
 
 \subsection{Dataset Description}
-We use the CoNLL-2003 dataset with official train/validation/test splits. The label inventory contains 9 BIO tags: \texttt{O}, \texttt{B/I-PER}, \texttt{B/I-ORG}, \texttt{B/I-LOC}, \texttt{B/I-MISC}.
+We use the CoNLL-2003 dataset \citep{TjongKimSang2003conll} with official train/validation/test splits. The label inventory contains 9 BIO tags: \texttt{O}, \texttt{B/I-PER}, \texttt{B/I-ORG}, \texttt{B/I-LOC}, \texttt{B/I-MISC}.
 
 \begin{table}[H]
 \centering
@@ -35,12 +35,14 @@ Test & 2,773 & 2,496 & 1,925 & 918 \\
 \end{table}
 
 \subsection{Methodology}
-\textbf{BiLSTM-CRF.} We build a word-level vocabulary (20k) and a character vocabulary, initialize word embeddings with GloVe 100d, and use a character BiLSTM to produce subword-aware representations. The final architecture is word+char embeddings $\rightarrow$ BiLSTM $\rightarrow$ linear layer $\rightarrow$ CRF. The CRF models label dependencies and enforces BIO-consistent transitions.
+\textbf{BiLSTM-CRF \citep{Lample2016bilstm}.} We build a word-level vocabulary (20k) and a character vocabulary, initialize word embeddings with GloVe 100d \citep{Pennington2014glove}, and use a character BiLSTM to produce subword-aware representations. The final architecture is word+char embeddings $\rightarrow$ BiLSTM $\rightarrow$ linear layer $\rightarrow$ CRF. The CRF models label dependencies and enforces BIO-consistent transitions.
 
-\textbf{BERT token classification.} We use \texttt{bert-base-cased} with a token classification head. Because BERT uses WordPiece tokenization, we align labels by assigning the original label to the first subword and \texttt{-100} to subsequent subwords and special tokens (ignored in the loss). We train for 3 epochs with batch size 16 and learning rate $5\times10^{-5}$.
+\textbf{BERT token classification \citep{Devlin2019bert}.} We use \texttt{bert-base-cased} with a token classification head. Because BERT uses WordPiece tokenization, we align labels by assigning the original label to the first subword and \texttt{-100} to subsequent subwords and special tokens (ignored in the loss). We train for 3 epochs with batch size 16 and learning rate $5\times10^{-5}$.
 
 \subsection{Experimental Setup}
-We fix the random seed to 42 and evaluate once on the test split. Early stopping is applied to BiLSTM-CRF based on validation F1 (patience 5). The BERT training time is 138.23 seconds; BiLSTM-CRF timing was logged as 0.0 seconds in the output (likely a timing artifact).
+We fix the random seed to 42 and evaluate once on the test split. Early stopping is applied to BiLSTM-CRF based on validation F1 (patience 5); training continued for 16 epochs (Figure~\ref{fig:q2_bilstm_curves}) before validation F1 plateaued near $0.92$. BERT training took 138.23\,s on the project hardware (RTX 5060 Ti).
+
+\paragraph{Note on BiLSTM-CRF training time.} The \texttt{train\_time\_seconds} field for BiLSTM-CRF is logged as \texttt{0.0} in \texttt{outputs/results.json}. This is a logging artifact rather than an actual measurement: the run script (\texttt{q2\_run.py}, lines 459--463) re-uses a previously saved checkpoint when \texttt{bilstm\_crf\_best.pt} is present and skips the training loop, in which case the timer is initialised to \texttt{0.0} and the field is not recomputed. The actual training was 16 epochs end-to-end on the RTX 5060\,Ti (the exact wall-clock for that initial training run was not persisted to disk). Treat the \texttt{0.0} entry in \texttt{results.json} as ``not measured'' and rely on the per-epoch validation log in \texttt{outputs/bilstm\_crf\_training\_log.json} for evidence that training actually executed.
 
 \subsection{Results}
 \begin{table}[H]
@@ -74,7 +76,8 @@ Overall & BERT & 0.9024 & 0.9157 & 0.9090 \\
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.65\linewidth]{../q2_ner/outputs/figures/training_bilstm_crf.png}
-\caption{BiLSTM-CRF validation F1 across epochs.}
+\caption{BiLSTM-CRF validation F1 across epochs. Training ran for 16 epochs.}
+\label{fig:q2_bilstm_curves}
 \end{figure}
 
 \begin{figure}[H]

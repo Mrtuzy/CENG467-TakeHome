@@ -4,7 +4,7 @@
 We study binary sentiment classification on movie reviews. Given a review $x$, the task is to predict a label $y \in \{0,1\}$ where $0$ denotes negative sentiment and $1$ denotes positive sentiment. The goal is to compare sparse, dense, and contextual representations under a consistent evaluation protocol.
 
 \subsection{Dataset Description}
-We use the IMDb dataset with the official train and test splits, and create a stratified 10\% validation split from the training set (seed 42). The data are balanced across classes.
+We use the IMDb dataset \citep{Maas2011imdb} with the official train and test splits, and create a stratified 10\% validation split from the training set (seed 42). The data are balanced across classes.
 
 \begin{table}[H]
 \centering
@@ -21,13 +21,63 @@ Test & 25,000 & 228.53 & 12,500 & 12,500 \\
 \end{table}
 
 \subsection{Methodology}
-\textbf{Preprocessing and tokenization.} We compare two tokenization strategies: (i) a classical pipeline using NLTK word tokenization with optional lowercasing and stopword removal, and (ii) the DistilBERT tokenizer for contextual modeling. For the classical pipeline, we run an ablation over four configurations (A1--A4) and pick the best validation accuracy. A truncation study shows that larger token budgets improve validation accuracy (100 tokens: 0.8444, 200 tokens: 0.8720, 400 tokens: 0.8948).
+\textbf{Tokenization strategies.} We compare two tokenization strategies and report which model uses each (Table~\ref{tab:q1_tokenizers}). The classical NLTK \texttt{word\_tokenize} is used for TF-IDF and BiLSTM (with the best preprocessing config from Table~\ref{tab:q1_preproc}); the DistilBERT WordPiece tokenizer is used for the contextual model. The two pipelines therefore differ in granularity (whole-word vs.\ subword), in casing handling, and in the way unseen tokens are managed: NLTK reduces them to the unknown token after vocabulary clipping at 30k, while WordPiece falls back to subword units and never emits \texttt{<unk>}.
+
+\begin{table}[H]
+\centering
+\caption{Tokenization strategy assigned to each model and the resulting test accuracy.}
+\label{tab:q1_tokenizers}
+\begin{tabular}{llll}
+\toprule
+\textbf{Tokenizer} & \textbf{Granularity} & \textbf{Used by} & \textbf{Test Acc} \\
+\midrule
+NLTK \texttt{word\_tokenize} & Whole words           & TF-IDF + LR     & 0.8966 \\
+NLTK \texttt{word\_tokenize} & Whole words           & BiLSTM + GloVe  & 0.8898 \\
+DistilBERT WordPiece          & Subword (30k pieces)  & DistilBERT      & 0.9296 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Preprocessing ablation (TF-IDF + LR, validation set).} Table~\ref{tab:q1_preproc} reports a 2$\times$2 ablation over lowercasing and stopword removal. Removing stopwords consistently \emph{hurts} validation accuracy, by $0.5$ percentage points when text is lowercased (A2 vs.\ A1) and by $0.4$ points when it is not (A4 vs.\ A3); lowercasing alone has a smaller and slightly negative effect ($-0.08$ pts in A1 vs.\ A3, $-0.08$ pts in A2 vs.\ A4). Configuration A4 (\textbf{no} lowercasing, \textbf{no} stopword removal) is best and is used for the final TF-IDF run. The dominant signal is that bigram features such as ``not good'' or ``never bored'' are valuable for sentiment, so removing common functional words like \emph{not} actively destroys information.
+
+\begin{table}[H]
+\centering
+\caption{Preprocessing ablation on the validation set (TF-IDF + LR).}
+\label{tab:q1_preproc}
+\begin{tabular}{lcccr}
+\toprule
+\textbf{Config} & \textbf{Lowercase} & \textbf{Remove stopwords} & \textbf{Val Accuracy} & \textbf{$\Delta$ vs.\ A4} \\
+\midrule
+A1 & Yes & Yes & 0.8904          & $-$0.0060 \\
+A2 & Yes & No  & 0.8956          & $-$0.0008 \\
+A3 & No  & Yes & 0.8924          & $-$0.0040 \\
+A4 & No  & No  & \textbf{0.8964} & $0.0000$  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Truncation ablation (BiLSTM, validation set).} Table~\ref{tab:q1_trunc} shows that capacity to read the full review matters: extending the sequence cap from 100 to 400 tokens lifts validation accuracy by 5 points. IMDb reviews average 234 whitespace tokens (\S\,Dataset Description), so a cap of 100 truncates more than half of an average review. We therefore use \texttt{max\_seq\_length}\,=\,400 in the final BiLSTM run.
+
+\begin{table}[H]
+\centering
+\caption{Truncation ablation for BiLSTM (validation accuracy).}
+\label{tab:q1_trunc}
+\begin{tabular}{rr}
+\toprule
+\textbf{Max tokens} & \textbf{Val Accuracy} \\
+\midrule
+100 & 0.8444 \\
+200 & 0.8720 \\
+400 & \textbf{0.8948} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \textbf{Models.}
 \begin{itemize}[leftmargin=*]
-		\item \textbf{TF-IDF + Logistic Regression} (sparse): unigram and bigram TF-IDF features with linear classifier.
-		\item \textbf{BiLSTM + GloVe} (dense static): word embeddings initialized with GloVe 100d, BiLSTM encoder, mean pooling, and linear output.
-		\item \textbf{DistilBERT} (contextual): fine-tuned DistilBERT for sequence classification.
+		\item \textbf{TF-IDF + Logistic Regression} \citep{Pedregosa2011sklearn} (sparse): unigram and bigram TF-IDF features (\texttt{max\_features}\,=\,50k, \texttt{min\_df}\,=\,2, sublinear TF) with linear classifier.
+		\item \textbf{BiLSTM + GloVe} \citep{Pennington2014glove} (dense static): word embeddings initialized with GloVe 6B 100d, two-layer BiLSTM encoder (hidden 128), mean pooling, dropout 0.3, linear output.
+		\item \textbf{DistilBERT} \citep{Sanh2019distilbert} (contextual): fine-tuned \texttt{distilbert-base-uncased} for sequence classification (3 epochs, lr $2\!\times\!10^{-5}$, batch 16).
 \end{itemize}
 
 \subsection{Experimental Setup}
@@ -36,14 +86,14 @@ We use fixed seed 42, a stratified validation split, and evaluate once on the te
 \subsection{Results}
 \begin{table}[H]
 \centering
-\caption{Test set results for Q1.}
-\begin{tabular}{lccc}
+\caption{Test set results for Q1, including wall-clock training time on the project hardware.}
+\begin{tabular}{lcccr}
 \toprule
-\textbf{Model} & \textbf{Representation} & \textbf{Accuracy} & \textbf{Macro-F1} \\
+\textbf{Model} & \textbf{Representation} & \textbf{Accuracy} & \textbf{Macro-F1} & \textbf{Train Time} \\
 \midrule
-TF-IDF + LR & Sparse & 0.8966 & 0.8966 \\
-BiLSTM + GloVe & Dense (static) & 0.8898 & 0.8898 \\
-DistilBERT & Contextual & 0.9296 & 0.9296 \\
+TF-IDF + LR     & Sparse         & 0.8966 & 0.8966 & 29.4\,s \\
+BiLSTM + GloVe  & Dense (static) & 0.8898 & 0.8898 & 368.8\,s \\
+DistilBERT      & Contextual     & \textbf{0.9296} & \textbf{0.9296} & 555.6\,s \\
 \bottomrule
 \end{tabular}
 \end{table}

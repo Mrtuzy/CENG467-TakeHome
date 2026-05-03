@@ -117,6 +117,7 @@ above. Key findings are: pre-trained transformer models consistently outperform 
 \appendix
 \section{Experimental Configuration Summary}
 
+\subsection*{A.1 Global settings}
 \begin{table}[H]
 \centering
 \caption{Global experimental settings applied to all questions.}
@@ -127,8 +128,82 @@ above. Key findings are: pre-trained transformer models consistently outperform 
 Random seed & 42 \\
 Python version & 3.10 \\
 PyTorch version & 2.x \\
-GPU & Google Colab T4 \\
+GPU & RTX 5060\,Ti \\
 Test set usage & Once (final evaluation only) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{A.2 Q1 -- Text classification}
+\begin{table}[H]
+\centering
+\caption{Q1 hyperparameters per model.}
+\begin{tabular}{lp{0.6\linewidth}}
+\toprule
+\textbf{Model} & \textbf{Hyperparameters} \\
+\midrule
+TF-IDF + LR    & \texttt{TfidfVectorizer}: max\_features=50{,}000, ngram\_range=(1,2), min\_df=2, sublinear\_tf=True. \texttt{LogisticRegression}: $C=1.0$, max\_iter=1000, solver=lbfgs, random\_state=42. Best preprocessing: lowercase=False, remove\_stopwords=False (config A4). \\
+BiLSTM + GloVe & embed\_dim=100 (GloVe 6B), hidden\_dim=128, num\_layers=2, bidirectional, dropout=0.3, max\_vocab=30{,}000, max\_seq\_length=400, batch\_size=64, optimizer=Adam, lr=$10^{-3}$, scheduler=ReduceLROnPlateau (patience=2, factor=0.5), num\_epochs=10, early-stop patience=3, loss=BCEWithLogits. \\
+DistilBERT     & \texttt{distilbert-base-uncased}, max\_length=512, batch\_size=16, lr=$2\!\times\!10^{-5}$, num\_epochs=3, warmup\_ratio=0.1, weight\_decay=0.01, fp16=True. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{A.3 Q2 -- Named entity recognition}
+\begin{table}[H]
+\centering
+\caption{Q2 hyperparameters per model.}
+\begin{tabular}{lp{0.6\linewidth}}
+\toprule
+\textbf{Model} & \textbf{Hyperparameters} \\
+\midrule
+BiLSTM-CRF & word\_vocab=20{,}000, embed=GloVe 100d (fine-tuned), char-BiLSTM for subword features, BiLSTM hidden=200, dropout=0.5, optimizer=Adam, gradient clip=5.0, max\_epochs=20, early-stop patience=5 on val F1. Trained for 16 epochs (best val F1 $\approx 0.926$). \\
+BERT       & \texttt{bert-base-cased}, num\_epochs=3, batch\_size=16, lr=$5\!\times\!10^{-5}$, label alignment by first-subword (others $-100$). Train time 138.23\,s. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{A.4 Q3 -- Summarization}
+\begin{table}[H]
+\centering
+\caption{Q3 hyperparameters per method.}
+\begin{tabular}{lp{0.6\linewidth}}
+\toprule
+\textbf{Method} & \textbf{Hyperparameters} \\
+\midrule
+TextRank   & sentence-level graph, top-$k=3$ sentences. \\
+LexRank    & cosine similarity graph with threshold, top-$k=3$ sentences. \\
+BART       & \texttt{facebook/bart-large-cnn}, max\_length=128 generation, num\_beams=4, no\_repeat\_ngram\_size=3, length\_penalty=2.0. Inference only. \\
+T5         & \texttt{t5-small}, prefix=``summarize:'', max\_length=128, num\_beams=4. Inference only. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{A.5 Q4 -- Machine translation}
+\begin{table}[H]
+\centering
+\caption{Q4 hyperparameters per model.}
+\begin{tabular}{lp{0.6\linewidth}}
+\toprule
+\textbf{Model} & \textbf{Hyperparameters} \\
+\midrule
+Seq2Seq + Bahdanau & joint BPE 8{,}000 (SentencePiece), emb\_dim=256, enc\_hidden=512 (BiGRU), dec\_hidden=512 (GRU), dropout=0.5, batch\_size=128, lr=$10^{-3}$ (Adam), grad\_clip=1.0, teacher\_forcing\_ratio=0.5, num\_epochs=20 (early-stop patience=5 on val BLEU; best at epoch 14: val BLEU $31.37$), max\_src/tgt\_length=100. \\
+MarianMT          & \texttt{Helsinki-NLP/opus-mt-en-de}, num\_beams=4, max\_length=512. Inference only. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{A.6 Q5 -- Language modeling}
+\begin{table}[H]
+\centering
+\caption{Q5 hyperparameters per model.}
+\begin{tabular}{lp{0.6\linewidth}}
+\toprule
+\textbf{Model} & \textbf{Hyperparameters} \\
+\midrule
+Trigram KN     & $n=3$, interpolated Kneser-Ney, discount $D=0.75$. Vocab capped at 10{,}000 with min\_freq=3. \\
+LSTM           & embed=256, hidden=512, layers=2, dropout=0.5, BPTT seq\_len=35, batch\_size=64, optimizer=Adam, lr=$10^{-3}$, grad\_clip=0.25, StepLR (step=2, $\gamma$=0.5), num\_epochs=6, weight\_tying=False. Params: 11.37\,M. \\
+Transformer LM & embed=256, n\_heads=4, n\_layers=2, dim\_ff=512, dropout=0.2, sinusoidal pos.\ enc., causal mask, BPTT seq\_len=35, batch\_size=64, optimizer=Adam, lr=$5\!\times\!10^{-4}$, grad\_clip=0.5, StepLR (step=2, $\gamma$=0.5), num\_epochs=6. Params: 6.18\,M. \\
 \bottomrule
 \end{tabular}
 \end{table}
