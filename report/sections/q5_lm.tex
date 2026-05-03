@@ -1,74 +1,122 @@
 % Q5 language modeling section
 
 \subsection{Problem Formulation}
-We study probabilistic language modeling on WikiText-2. Given a token sequence $w_1, \ldots, w_N$, the model estimates the next-token distribution and can generate text. We compare a classical trigram model with Kneser-Ney smoothing against neural sequence models (LSTM and a small Transformer). Evaluation uses perplexity and short generated samples.
+We study probabilistic language modeling on WikiText-2. Given a token sequence $w_1, \ldots, w_N$, each model estimates the next-token distribution $P(w_i \mid w_{<i})$ and can generate text by autoregressive sampling. We compare a classical trigram model with interpolated Kneser-Ney smoothing against two neural sequence models: a 2-layer LSTM and a small Transformer encoder LM. Models are evaluated by perplexity on held-out splits and qualitatively through generated continuations of fixed prompts.
 
 \subsection{Dataset Description}
-We use the WikiText-2 raw dataset with the official train/validation/test splits. Lines that are empty or section headers are removed, text is lowercased, and an \texttt{<eos>} token is appended at line boundaries.
+We use the WikiText-2 raw dataset (\texttt{wikitext-2-raw-v1}) with the official train/validation/test splits. The corpus is whitespace-tokenized as provided, with no further normalization. Statistics after tokenization are summarized in Table~\ref{tab:q5_data}.
 
 \begin{table}[H]
 \centering
-\caption{WikiText-2 dataset statistics after preprocessing.}
-\begin{tabular}{lrrrr}
-\toprule
-\textbf{Split} & \textbf{Tokens} & \textbf{Avg Sent Len} & \textbf{\% <unk>} \\
-\midrule
-Train & 2,024,702 & 114.33 & -- \\
-Validation & 211,179 & 113.71 & 4.78 \\
-Test & 238,028 & 108.04 & 5.69 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Vocabulary size after \texttt{min\_freq=3} filtering is 29,477.
-
-\subsection{Methodology}
-\textbf{Trigram Kneser-Ney.} We train a 3-gram model with Kneser-Ney smoothing (discount $D=0.75$). Kneser-Ney discounts observed counts and redistributes probability mass to lower-order n-grams using continuation probabilities, which improves estimates for rare and unseen events compared to add-one or backoff baselines.
-
-\textbf{LSTM language model.} We use a 2-layer LSTM with 200-dim embeddings and hidden size 200, batch size 64, and BPTT length 64. Weight tying is used between input embeddings and output projection. We train for 3 epochs with SGD.
-
-\textbf{Transformer LM (optional).} A small Transformer encoder LM is trained for 2 epochs with batch size 64 and BPTT length 128. This run is intentionally lightweight and mainly for comparison.
-
-\textbf{Perplexity.} We report perplexity defined as
-$$
-\text{PPL}(W) = P(w_1, w_2, \ldots, w_N)^{-1/N}.
-$$
-Lower perplexity indicates better predictive performance.
-
-\subsection{Results}
-\begin{table}[H]
-\centering
-\caption{Perplexity on validation and test splits (lower is better).}
+\caption{WikiText-2 dataset statistics.}
+\label{tab:q5_data}
 \begin{tabular}{lrr}
 \toprule
-\textbf{Model} & \textbf{Val PPL} & \textbf{Test PPL} \\
+\textbf{Split} & \textbf{Tokens} & \textbf{Avg Sentence Length} \\
 \midrule
-Trigram KN & 129.40 & 121.74 \\
-LSTM & 981.11 & 923.66 \\
-Transformer & 4747.20 & 4587.47 \\
+Train      & 2{,}024{,}702 & 114.33 \\
+Validation &   211{,}179 & 113.71 \\
+Test       &   238{,}028 & 108.04 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The trigram model achieves the lowest perplexity. The LSTM and Transformer are undertrained (3 and 2 epochs respectively), which explains their much higher perplexities.
+\textbf{Vocabulary.} Tokens with training-set frequency $\geq 3$ are retained, and the vocabulary is capped at the 10{,}000 most frequent types, plus the special tokens \texttt{<pad>}, \texttt{<unk>}, \texttt{<bos>}, \texttt{<eos>}. Out-of-vocabulary tokens at evaluation time are mapped to \texttt{<unk>}. Figure~\ref{fig:q5_zipf} plots the rank--frequency curve of the top 5{,}000 tokens, which closely follows a Zipfian distribution and motivates the use of a frequency cutoff.
 
-\subsection{Qualitative Analysis}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\linewidth]{../q5_lm/results/figures/zipf.png}
+\caption{Token rank--frequency distribution (log-log) on the WikiText-2 training set.}
+\label{fig:q5_zipf}
+\end{figure}
+
+\subsection{Methodology}
+
+\textbf{Trigram with interpolated Kneser-Ney.} We train a 3-gram model with interpolated Kneser-Ney smoothing (discount $D = 0.75$). The bigram and unigram backoffs use \emph{continuation} counts $N_{1+}(\cdot\, w)$ rather than raw counts, which reduces the probability of frequent words that nevertheless appear in few distinct contexts. Sentences are obtained by splitting on the period token and bracketed by two \texttt{<s>} symbols and a closing \texttt{</s>}. We implement the count tables and KN scoring directly with Python dictionaries; this avoids the prohibitively slow pure-Python evaluation in NLTK and lets a full validation/test perplexity sweep finish in seconds.
+
+\textbf{LSTM language model.} A 2-layer LSTM with 256-dim embeddings, 512-dim hidden state, and dropout $0.5$ on both the embedding and the recurrent output. Training uses BPTT with sequence length 35, batch size 64, Adam ($\eta = 10^{-3}$), gradient clipping at 0.25, and a step LR scheduler that halves the learning rate every 2 epochs. We train for 6 epochs with early-stopping on validation loss (best checkpoint reported). The model has 11.37\,M parameters.
+
+\textbf{Transformer LM.} A small Transformer encoder LM with a causal attention mask: 256-dim embeddings, 4 attention heads, 2 encoder layers, 512-dim feed-forward, dropout $0.2$, and sinusoidal positional encoding. Training uses BPTT length 35, batch size 64, Adam ($\eta = 5 \cdot 10^{-4}$), gradient clipping at 0.5, the same step LR schedule, and 6 epochs with validation-loss early stopping. The model has 6.18\,M parameters --- roughly half the LSTM's parameter count.
+
+\textbf{Perplexity.} We report token-level perplexity on whole splits:
+$$
+\mathrm{PPL}(W) = \exp\!\Bigg(-\frac{1}{N}\sum_{i=1}^{N} \log P(w_i \mid w_{<i})\Bigg).
+$$
+Lower is better. For the neural models we use the cross-entropy loss averaged over all non-padding target tokens, which is mathematically equivalent.
+
+\textbf{Generation.} For neural models we use top-$k$ sampling with $k = 20$ and temperature $T = 0.9$. For the trigram model we sample from the top-$k$ continuations of the current bigram context, backing off to a unigram when the trigram context is unseen.
+
+\subsection{Results}
+
 \begin{table}[H]
 \centering
-\caption{Sample generations (one per model).}
-\small
-\begin{tabular}{p{0.18\linewidth} p{0.75\linewidth}}
+\caption{Validation and test perplexity on WikiText-2 (lower is better). The LSTM is the strongest model overall.}
+\label{tab:q5_ppl}
+\begin{tabular}{lrrr}
 \toprule
-\textbf{Model} & \textbf{Generated Text} \\
+\textbf{Model} & \textbf{Params} & \textbf{Val PPL} & \textbf{Test PPL} \\
 \midrule
-Trigram KN & = valkyria chronicles game . nonetheless , they discover that the somali coast in 1785 , two companies were destroyed . in his life for the field of bioinformatics is \\
-LSTM & townsend scarf -- being jumps . he = deco following been the believed standard suggesting divided united the is 's " little , lack manner the mountains ) reviews mate was \\
-Transformer & forester explanatory the decoy policemen theories astronomers worthing locate station viruses aadt protesters many ecstasy glider harder censor late papyri donoghue 2f critical considers horror misused mosque brett cluster seemingly ransom \\
+Trigram (Kneser-Ney) & --        & 376.49 & 375.69 \\
+Transformer LM       &  6.18\,M  & 129.52 & 117.32 \\
+LSTM LM              & 11.37\,M  & \textbf{105.83} & \textbf{97.00} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The trigram sample shows locally plausible word sequences but weak long-range coherence. The LSTM sample mixes fragments with punctuation and rare tokens, indicating limited training and unstable syntax. The Transformer sample is largely incoherent, consistent with its very high perplexity.
+The LSTM achieves the lowest perplexity on both splits, improving over the Kneser-Ney trigram by a factor of roughly $3.9\times$ on test. The Transformer is a clear second; despite having about half the parameters of the LSTM, its perplexity is only $\sim$20 PPL higher. Both neural models substantially beat the count-based baseline, which is the expected ordering on WikiText-2 once the neural models are trained for enough epochs to converge --- earlier short-budget runs of the same script produced under-trained neural models that were dominated by the trigram. Figure~\ref{fig:q5_ppl} visualizes the gap.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{../q5_lm/results/figures/ppl_comparison.png}
+\caption{Validation and test perplexity per model on WikiText-2. The LSTM is best, followed by the Transformer; the trigram baseline is roughly $4\times$ worse.}
+\label{fig:q5_ppl}
+\end{figure}
+
+\textbf{Training dynamics.} Figure~\ref{fig:q5_curves} shows per-epoch training and validation loss/PPL for the two neural models. Both decrease monotonically across the 6-epoch budget. The LSTM starts higher (training PPL $\approx 326$ at epoch 1) but ends lower than the Transformer; the Transformer converges faster early (lower epoch-1 train PPL of $273$) and trains in roughly half the wall-clock time per epoch ($\sim$8.8\,s vs.\ $\sim$15\,s on the same hardware), but its final validation perplexity plateaus higher. Neither model shows over-fitting at this budget --- the gap between train and val PPL stays bounded --- which suggests that further epochs would likely improve both, particularly the Transformer.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{../q5_lm/results/figures/training_curves.png}
+\caption{Per-epoch training and validation loss/perplexity for the LSTM and Transformer language models.}
+\label{fig:q5_curves}
+\end{figure}
+
+\subsection{Qualitative Analysis}
+
+Table~\ref{tab:q5_samples} shows generations from each model for two of the four test prompts (top-$k=20$, $T=0.9$, 30 new tokens).
+
+\begin{table}[H]
+\centering
+\caption{Generated continuations for two prompts. \texttt{<unk>} marks tokens outside the 10K vocabulary.}
+\label{tab:q5_samples}
+\small
+\begin{tabular}{p{0.13\linewidth} p{0.80\linewidth}}
+\toprule
+\textbf{Model} & \textbf{Generated text} \\
+\midrule
+\multicolumn{2}{l}{\emph{Prompt: ``the meaning of life is''}} \\
+Trigram KN & ...sacred because from order to make the first half , Tech made good the penalty , giving up on the same time , and a large number of people . \\
+LSTM       & ...\texttt{<unk>} and the `` \texttt{<unk>} \texttt{<unk>} '' ( `` \texttt{<unk>} @-@ \texttt{<unk>} , \texttt{<unk>} '' ) . He also has been known as \texttt{<unk>} on \texttt{<unk>} 's \texttt{<unk>} and \texttt{<unk>} \\
+Transformer& ...\texttt{<unk>} , and \texttt{<unk>} @-@ \texttt{<unk>} \texttt{<unk>} . = = = = = = \texttt{<unk>} and \texttt{<unk>} = = \texttt{<unk>} of The \texttt{<unk>} , \texttt{<unk>} \texttt{<unk>} and \texttt{<unk>} = = \\
+\midrule
+\multicolumn{2}{l}{\emph{Prompt: ``in the early years of''}} \\
+Trigram KN & ...the game 's protagonist as Sim\'on Bol\'ivar , a small , independent judicial system governed by the National Hurricane Center did not . \\
+LSTM       & ...the \texttt{<unk>} of \texttt{<unk>} 's reign . In the first year of the 19th Kingdom , the \texttt{<unk>} was a \texttt{<unk>} \texttt{<unk>} . \texttt{<unk>} said that the \texttt{<unk>} of the \\
+Transformer& ...the 19th century BCE and \texttt{<unk>} . The \texttt{<unk>} , \texttt{<unk>} 's son \texttt{<unk>} of \texttt{<unk>} of the \texttt{<unk>} and \texttt{<unk>} , and the city 's \texttt{<unk>} of Tintin \texttt{<unk>} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The qualitative pattern is consistent across all four prompts. The trigram produces locally fluent surface text (``the game 's protagonist as Sim\'on Bol\'ivar'') because each next-word distribution is conditioned on a real bigram seen in training, but it cannot maintain a topic and frequently jumps between unrelated entities. The LSTM and Transformer both produce more grammatical scaffolding (``In the first year of the 19th Kingdom'', ``in the early years of the 19th century BCE'') and stay closer to a single topic, but their outputs are dominated by \texttt{<unk>} tokens because the 10K vocabulary cap removes most of the proper nouns that WikiText-2 paragraphs revolve around. The Transformer in particular is prone to emitting Wikipedia section markers (``= = ='') --- a sign that it has memorized formatting tokens from training but does not yet generalize beyond them at this budget.
+
+This is a familiar tension: perplexity rewards calibrated probability mass on common tokens (where the LSTM excels), while perceived fluency depends on rare content words (which both neural models replace with \texttt{<unk>}). The trigram looks better on the page but is in fact much worse at predicting the held-out text.
 
 \subsection{Discussion}
-N-gram models capture short-range patterns and remain strong baselines on small corpora, but they lack global coherence and struggle with long dependencies. The LSTM should improve coherence with sufficient training, but in this short run it underfits and yields very high perplexity. The Transformer is even more data-hungry and requires more epochs or regularization to stabilize. Perplexity does not always align with perceived text quality, but here the ordering matches the observed fluency: the lowest-PPL trigram output is still more readable than the neural models trained for only a few epochs.
+
+\textbf{Why the LSTM wins.} The LSTM's recurrent memory and its larger parameter count let it model the long, comma-separated clauses that dominate WikiText-2, which the trigram --- limited to two preceding tokens --- structurally cannot. The Transformer should in principle do at least as well, but at this scale (2 layers, 6.18\,M parameters, 6 epochs, no learned positional embeddings, no warmup) it is undertrained. Transformer LMs are known to need more data and a more careful optimizer schedule than RNNs to reach their full potential; the gap we observe here ($\sim$20 PPL on test) is consistent with that.
+
+\textbf{Why the trigram is so far behind.} On a $\sim$2\,M-token corpus with a 10K vocabulary, most trigrams in the validation/test sets are unseen in training, so the model spends almost all of its probability mass via Kneser-Ney back-off. Continuation-count back-off is well-known to be a strong baseline, but it cannot capture syntactic dependencies more than two tokens away, and WikiText-2 sentences are long ($\approx$110 tokens on average). The neural models, even at modest capacity, can.
+
+\textbf{Limitations and what would help.} (i) The 10K vocabulary cap creates a heavy \texttt{<unk>} tax on the neural generations; subword tokenization (e.g.\ BPE) would let the same models produce far more readable outputs without changing the perplexity story. (ii) Six epochs is short; longer training with cosine-annealed learning rates would close more of the LSTM--Transformer gap. (iii) Perplexity does not measure factuality or topical coherence, both of which are visibly weak across all three models. (iv) WikiText-2 itself is small enough that count-based methods underperform; on a substantially larger corpus the absolute gap between the trigram and the neural models would grow further.
+
+Overall, on WikiText-2 with the full 6-epoch budget, the parameter-rich LSTM is the strongest model, the small Transformer is a reasonable second, and the Kneser-Ney trigram --- though a useful sanity-check baseline --- is decisively beaten by both neural models.

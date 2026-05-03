@@ -1,0 +1,62 @@
+{
+  "config": {
+    "dataset_name": "wikitext-2-raw-v1",
+    "vocab_size": 10000,
+    "min_freq": 3,
+    "ngram_n": 3,
+    "lstm": {
+      "embed_dim": 256,
+      "hidden_dim": 512,
+      "num_layers": 2,
+      "dropout": 0.5,
+      "seq_len": 35,
+      "batch_size": 64,
+      "epochs": 6,
+      "lr": 0.001,
+      "clip": 0.25
+    },
+    "transformer": {
+      "embed_dim": 256,
+      "n_heads": 4,
+      "n_layers": 2,
+      "dim_feedforward": 512,
+      "dropout": 0.2,
+      "seq_len": 35,
+      "batch_size": 64,
+      "epochs": 6,
+      "lr": 0.0005,
+      "clip": 0.5
+    },
+    "generation": {
+      "prompts": [
+        "the meaning of life is",
+        "in the early years of",
+        "the company announced that",
+        "scientists have discovered"
+      ],
+      "max_new_tokens": 30,
+      "temperature": 0.9,
+      "top_k": 20
+    },
+    "run_transformer": true
+  },
+  "vocab_size": 10000,
+  "device": "cuda",
+  "ngram": {
+    "smoothing": "Interpolated Kneser-Ney (custom)",
+    "discount": 0.75,
+    "n": 3,
+    "valid_ppl": 376.48911610722064,
+    "test_ppl": 375.69002537324985
+  },
+  "lstm": {
+    "valid_ppl": 105.83353945010961,
+    "test_ppl": 97.00306544131254,
+    "params": 11368208
+  },
+  "transformer": {
+    "valid_ppl": 129.51858245001924,
+    "test_ppl": 117.32212408444484,
+    "params": 6184208
+  }
+}

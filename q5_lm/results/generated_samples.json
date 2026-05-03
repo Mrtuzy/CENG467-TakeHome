@@ -1,0 +1,26 @@
+[
+  {
+    "prompt": "the meaning of life is",
+    "ngram": "the meaning of life is sacred because from order to make the first half , Tech made good the penalty , giving up on the same time , and a large number of people .",
+    "lstm": "the meaning of life is <unk> and the \" <unk> <unk> \" ( \" <unk> @-@ <unk> , <unk> \" ) . He also has been known as <unk> on <unk> 's <unk> and <unk>",
+    "transformer": "the meaning of life is <unk> , and <unk> @-@ <unk> <unk> . = = = = = = <unk> and <unk> = = <unk> of The <unk> , <unk> <unk> and <unk> = ="
+  },
+  {
+    "prompt": "in the early years of",
+    "ngram": "in the early years of the game 's protagonist as Simón Bolívar , a small , independent judicial system governed by the National Hurricane Center did not .",
+    "lstm": "in the early years of the <unk> of <unk> 's reign . In the first year of the 19th Kingdom , the <unk> was a <unk> <unk> . <unk> said that the <unk> of the",
+    "transformer": "in the early years of the 19th century BCE and <unk> . The <unk> , <unk> 's son <unk> of <unk> of the <unk> and <unk> , and the city 's <unk> of Tintin <unk>"
+  },
+  {
+    "prompt": "the company announced that",
+    "ngram": "the company announced that it has been described as \" the most powerful celebrity in the United Kingdom , Amun was supreme in the world \" ( \" I 'm happy as long as",
+    "lstm": "the company announced that the <unk> of the <unk> was the <unk> of the American Navy of the <unk> in the <unk> . It was also included by a member of <unk> to take",
+    "transformer": "the company announced that he had been made to <unk> . He <unk> from <unk> , a new commander and a <unk> . <unk> of the most notably the first appearance of the original"
+  },
+  {
+    "prompt": "scientists have discovered",
+    "ngram": "scientists have discovered a strong friendship with Leo Wyatt ( the equivalent of £ 2 @,@ 000 copies .",
+    "lstm": "scientists have discovered the name \" <unk> \" , who is also described to the <unk> 's \" <unk> <unk> \" . <unk> of the novel as \" <unk> \" and the <unk>",
+    "transformer": "scientists have discovered the <unk> <unk> , and the <unk> from a <unk> by <unk> , which can be considered in front of the <unk> . The <unk> to <unk> , <unk> ,"
+  }
+]
